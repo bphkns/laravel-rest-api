@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreTopicRequest;
 use App\Topic;
 use App\Post;
@@ -14,33 +13,33 @@ class TopicController extends Controller
 {
     public function index()
     {
-        $topics  = Topic::latestFirst()->paginate(2);
+        $topics           = Topic::latestFirst()->paginate(2);
         $topicsCollection = $topics->getCollection();
 
         return \fractal()
                 ->collection($topicsCollection)
                 ->parseIncludes(['user'])
                 ->transformWith(new TopicTransformer())
-                ->paginateWith( new IlluminatePaginatorAdapter($topics))
+                ->paginateWith(new IlluminatePaginatorAdapter($topics))
                 ->toArray();
     }
 
-    public function show( Topic $topic)
+    public function show(Topic $topic)
     {
         return \fractal()
                 ->item($topic)
-                ->parseIncludes(['user','posts','posts.user','posts.likes'])
+                ->parseIncludes(['user', 'posts', 'posts.user', 'posts.likes'])
                 ->transformWith(new TopicTransformer())
                 ->toArray();
     }
 
-    public function store( StoreTopicRequest $request)
+    public function store(StoreTopicRequest $request)
     {
-        $topic = new Topic();
+        $topic        = new Topic();
         $topic->title = $request->title;
         $topic->user()->associate($request->user());
 
-        $post = new Post();
+        $post       = new Post();
         $post->body = $request->body;
         $post->user()->associate($request->user());
 
@@ -49,18 +48,16 @@ class TopicController extends Controller
 
         return \fractal()
                 ->item($topic)
-                ->parseIncludes(['user','posts','posts.user'])
+                ->parseIncludes(['user', 'posts', 'posts.user'])
                 ->transformWith(new TopicTransformer())
                 ->toArray();
-
     }
 
-    public function update( UpdateTopicRequest $request ,Topic $topic)
+    public function update(UpdateTopicRequest $request, Topic $topic)
     {
-        
-        $this->authorize('update',$topic);
+        $this->authorize('update', $topic);
 
-        $topic->title = $request->get('title',$topic->title);
+        $topic->title = $request->get('title', $topic->title);
         $topic->save();
 
         return \fractal()
@@ -68,16 +65,14 @@ class TopicController extends Controller
         ->parseIncludes(['user'])
         ->transformWith(new TopicTransformer())
         ->toArray();
-
     }
 
     public function destroy(Topic $topic)
     {
-        $this->authorize('destroy',$topic);
+        $this->authorize('destroy', $topic);
 
         $topic->delete();
 
-        return \response(null,204);
-
+        return \response(null, 204);
     }
 }
